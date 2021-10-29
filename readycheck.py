@@ -19,6 +19,9 @@ class ReadyCheck(MutableMapping):
         self.mapping["author"] = None
         self.mapping["guild"] = None
         self.mapping["channel"] = None
+        self.mapping["authorLastKnownName"] = None
+        self.mapping["guildLastKnownName"] = None
+        self.mapping["channelLastKnownName"] = None
         self.mapping["uniqueReactors"] = True
         self.mapping["createdAt"] = datetime.utcnow()
         self.mapping["updatedAt"] = datetime.utcnow()
@@ -49,6 +52,13 @@ class ReadyCheck(MutableMapping):
         self.mapping["author"] = message.author.id
         self.mapping["guild"] = message.guild.id
         self.mapping["channel"] = message.channel.id
+        self.mapping["authorLastKnownName"] = message.author.name
+        self.mapping["guildLastKnownName"] = message.guild.name
+        self.mapping["channelLastKnownName"] = message.channel.name
         self.mapping["uniqueReactors"] = uniqueReactors
         self.mapping["updatedAt"] = datetime.utcnow()
+        logger.debug("Built "+glimpse(self))
         return self
+
+def glimpse(rc):
+    return f'ReadyCheck: {rc["authorLastKnownName"]} in {rc["guildLastKnownName"]} / {rc["channelLastKnownName"]}'

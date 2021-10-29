@@ -3,15 +3,18 @@ import logging.config
 logging.config.fileConfig("logging.conf")
 logger = logging.getLogger("ops")
 
-from readycheck import ReadyCheck
+from readycheck import ReadyCheck, glimpse
+from datetime import *
 
 def findUniqueReadyCheck(collection, message):
     # ReadyCheck items should always be limited to one per user per channel
-    return collection.find_one({            \
+    result = collection.find_one({            \
             "author":message.author.id,     \
             "guild":message.guild.id,       \
             "channel":message.channel.id    \
     })
+
+    return result
 
 def findReadyCheckByMessageId(collection, id):
     return collection.find_one({"message":id})
@@ -34,22 +37,12 @@ async def createReadyCheck(ctx, target, mention, uniqueReactors, collection):
     logger.debug(f'Inserted {rc["id"]} into checks')  
 
     return  
-    
-async def cancelReadyCheck(bot, collection, checkToCancel):
-    collection.delete_one({"_id":checkToCancel["_id"]})
-    logger.info("Deleted one item from database")
-
-    channel = await bot.fetch_channel(checkToCancel["channel"])
-    message = await channel.fetch_message(checkToCancel["message"])
-    await message.delete()    
-
-    return
 
 async def clearAllReadyChecks(collection):
     # TODO: loop through and try to delete all associated messages
 
     result = collection.delete_many({})
-    logging.warn(f'Deleted {result.deleted_count} items from database')
+    logging.warning(f'Deleted {result.deleted_count} items from database')
     
     return
 
@@ -94,5 +87,33 @@ async def fulfillReadyCheck(bot, collection, rc):
     # TODO: transfer reactions from old message to ready confirmation
     collection.delete_one({"_id":rc["_id"]})
     await message.delete()
+
+    return
+
+async def timeoutReadyChecks(bot, collection, timeoutInMinutes):
+    readyChecks = collection.find()
+    for rc in readyChecks:
+        rcg = glimpse(rc)
+        logger.debug(f'Item: {rcg}')
+        createdAt = rc["createdAt"]
+        timeout = createdAt + timedelta(minutes=timeoutInMinutes)
+        if datetime.utcnow() > timeout:
+            logger.info(f'Timeout: {rc["id"]} created by {rc["authorLastKnownName"]} in {rc["guildLastKnownName"]} / {rc["channelLastKnownName"]} at {createdAt.strftime("%Y-%m-%d %H:%M:%S")} UTC')
+            await removeReadyCheck(bot, collection, rc)
+
+    return
+
+async def removeReadyCheck(bot, collection, rc):
+    try:
+        channel = await bot.fetch_channel(rc["channel"])
+        message = await channel.fetch_message(rc["message"])
+        await message.delete()
+    except Exception as e:
+        logger.error(e)
+
+    collection.delete_one({"id":rc["id"]})
+
+    rcg = glimpse(rc)
+    logger.debug(f'Removed {rcg}')
 
     return

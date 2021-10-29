@@ -97,7 +97,7 @@ async def cancel(ctx):
     checkToCancel = findUniqueReadyCheck(checks, ctx.message)
 
     if checkToCancel is not None:
-        await cancelReadyCheck(bot, checks, checkToCancel)
+        await removeReadyCheck(bot, checks, checkToCancel)
     else:
         logger.warning("No matching item found in database")
         # TODO: DM user that no check was found
@@ -146,13 +146,20 @@ async def on_raw_reaction_add(payload):
     return
 
 
+timeoutFrequency = int(os.getenv('TIMEOUT_TASK_FREQUENCY_IN_MINUTES'))
+timeoutInMinutes = int(os.getenv('TIMEOUT_IN_MINUTES'))
+logger.debug(f'Timeout task: {timeoutFrequency}')
+logger.debug(f'Timeout: {timeoutInMinutes}')
 
+@tasks.loop(minutes=timeoutFrequency)
+async def timeoutChecks():
+    with contextlib.suppress(Exception):
+        logger.debug("Running timeout task...")
 
-# @tasks.loop(minutes=5)
-# async def timeoutChecks():
-#     with contextlib.suppress(Exception):
-#         # remove timed out tasks from database
-#         pass
+        await timeoutReadyChecks(bot, db.checks, timeoutInMinutes)
+
+        logger.debug("Timeout task complete")
+        return
 
 
 
@@ -192,5 +199,5 @@ async def on_raw_reaction_add(payload):
 
 
 
-# timeoutChecks.start()
+timeoutChecks.start()
 bot.run(TOKEN)
