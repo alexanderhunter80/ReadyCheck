@@ -18,9 +18,11 @@ from ops import *
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
+COMMAND_PREFIX = os.getenv('COMMAND_PREFIX')
 
 bot = commands.Bot(                                                                                                             \
-    command_prefix='?',                                                                                                         \
+    command_prefix=COMMAND_PREFIX,                                                                                              \
+    help_command=None,                                                                                                          \
     description='Interactive ready checks via Discord reactions.',                                                              \
     intents=discord.Intents.default(),                                                                                          \
     allowed_mentions=discord.AllowedMentions(users=True, everyone=True, roles=True, replied_user=True)                          \
@@ -33,6 +35,10 @@ db = mongoClient.readycheck
 async def on_ready():
     logger.info(f'{bot.user} has connected to Discord!')
     logger.debug(f'ID: {bot.user.id}')
+
+###############################
+# Commands
+###############################
 
 @bot.command()
 async def ready(ctx, target: int, mention: str = None, uniqueReactors: bool = True):
@@ -49,11 +55,9 @@ async def ready(ctx, target: int, mention: str = None, uniqueReactors: bool = Tr
         logger.debug(f'Conflicting object: {checkForConflicts}')
         # TODO: clear command message and DM user about error
 
-    return
+    await ctx.message.delete()
 
-###############################
-# Commands
-###############################
+    return
 
 @bot.command()
 async def cancel(ctx):
@@ -84,6 +88,16 @@ async def clearAll(ctx):
         await clearAllReadyChecks(db.checks)
     else:
         logger.warning("Non-admin user called clearAll!")
+
+    await ctx.message.delete()
+
+    return
+
+@bot.command()
+async def help(ctx):
+    logger.info(f'{ctx.message.author.name} called for help')
+
+    await sendHelpMessage(ctx)
 
     await ctx.message.delete()
 

@@ -3,6 +3,8 @@ import logging.config
 logging.config.fileConfig("logging.conf")
 logger = logging.getLogger("ops")
 
+import os
+from dotenv import load_dotenv
 from readycheck import ReadyCheck, glimpse
 from datetime import datetime, timedelta
 
@@ -40,7 +42,6 @@ async def createReadyCheck(ctx, target, mention, uniqueReactors, collection):
     if mentionInMessage is not None:
         messageText = mentionInMessage+" "+messageText
 
-    await ctx.message.delete()
     sentMessage = await ctx.send(messageText)
     rc["message"] = sentMessage.id
 
@@ -70,6 +71,39 @@ async def clearAllReadyChecks(collection):
     result = collection.delete_many({})
     logging.warning(f'Deleted {result.deleted_count} items from database')
     
+    return
+
+
+async def sendHelpMessage(ctx):
+    timeoutInMinutes = int(os.getenv('TIMEOUT_IN_MINUTES'))
+    commandPrefix = os.getenv('COMMAND_PREFIX')
+
+    msgLines = []
+
+    msgLines.append("```ReadyCheck helps you make sure that your whole group is ready to continue.")
+    msgLines.append("Here is a list of ?commands and their [arguments].  Required [arguments] are marked with an *asterisk.")
+    msgLines.append("The following commands are available:")
+    msgLines.append("\n")
+    msgLines.append(f"{commandPrefix}ready [*target] [rolemention] [uniqueReactors]")
+    msgLines.append("   Creates a ready check.  Once enough people react to this ready check message, the group will be notified that everyone is ready.")
+    msgLines.append("   [*target] (required) - The number of users needed to finish the ready check.")
+    msgLines.append("   [rolemention] - The name of a server role (without the @prefix) that will be mentioned when the ready check is started or completed.  Defaults to everyone.")
+    msgLines.append("   [uniqueReactors] - If this is false, the ready check will count the raw number of reactions to the message instead of how many users have reacted.  Defaults to true.")
+    msgLines.append(f"   Please note that you can only create one reaction per person per channel.  Unfulfilled reactions will time out after {timeoutInMinutes} minutes and be removed.")
+    msgLines.append("\n")
+    msgLines.append(f"{commandPrefix}cancel")
+    msgLines.append("   Cancels an active ready check made by you in this channel.")
+    msgLines.append("\n")
+    msgLines.append(f"{commandPrefix}help")
+    msgLines.append("   Sends you this message.")
+    msgLines.append("```")
+
+    helpMessage = "\n".join(msgLines)
+
+    helpUser = ctx.message.author
+    channel = await helpUser.create_dm()
+    await channel.send(helpMessage)
+
     return
 
 ###############################
