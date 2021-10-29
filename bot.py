@@ -19,12 +19,12 @@ from ops import *
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 
-description='Interactive ready checks via Discord reactions.'
-intents = discord.Intents.default()
-
-bot = commands.Bot(command_prefix='?', description=description, intents=intents)
-
-bot.trackedMessageId = 0
+bot = commands.Bot(                                                                                                             \
+    command_prefix='?',                                                                                                         \
+    description='Interactive ready checks via Discord reactions.',                                                              \
+    intents=discord.Intents.default(),                                                                                          \
+    allowed_mentions=discord.AllowedMentions(users=True, everyone=True, roles=True, replied_user=True)                          \
+)
 
 mongoClient = MongoClient()
 db = mongoClient.readycheck
@@ -33,44 +33,6 @@ db = mongoClient.readycheck
 async def on_ready():
     logger.info(f'{bot.user} has connected to Discord!')
     logger.debug(f'ID: {bot.user.id}')
-
-# @bot.command()
-# async def ready(ctx, count: int):
-#     logger.info(f'Ready check called for {count} reactions by {ctx.message.author.name}')
-    
-#     messageText = f'{ctx.message.author.name} has called for a ready check!  We need {count} reactions to be ready.'
-
-#     checks = db.checks
-#     if checks.find_one({"id":ctx.message.id}) is None:
-#         checks.insert_one({"id":ctx.message.id})
-    
-#     await ctx.message.delete()
-
-#     sentMessage = await ctx.send(messageText)
-    
-#     bot.trackedMessageId = sentMessage.id
-#     logger.debug(f'Tracking message {bot.trackedMessageId}')
-    
-#     def check(reaction, user):
-#         logger.debug('Called check function')
-#         totalReactions = 0
-#         for rx in reaction.message.reactions:
-#             totalReactions += rx.count
-            
-#         logger.debug(f'Standing at {totalReactions} of {count}')
-#         return count <= totalReactions
-        
-#     try:
-#         await bot.wait_for('reaction_add', timeout=300.0, check=check)
-#     except asyncio.TimeoutError:
-#         logger.warn('Timed out!')
-#         await sentMessage.delete()
-#         await ctx.send('Ready check timed out!')
-#     else:
-#         await sentMessage.delete()
-#         await ctx.send('@everyone Ready!')
-        
-#     return
 
 @bot.command()
 async def ready(ctx, target: int, mention: str = None, uniqueReactors: bool = True):
@@ -88,6 +50,10 @@ async def ready(ctx, target: int, mention: str = None, uniqueReactors: bool = Tr
         # TODO: clear command message and DM user about error
 
     return
+
+###############################
+# Commands
+###############################
 
 @bot.command()
 async def cancel(ctx):
@@ -123,6 +89,10 @@ async def clearAll(ctx):
 
     return
     
+###############################
+# Event listeners
+###############################
+
 @bot.event
 async def on_raw_reaction_add(payload):
     rc = findReadyCheckByMessageId(db.checks, payload.message_id)
@@ -145,12 +115,12 @@ async def on_raw_reaction_add(payload):
 
     return
 
+###############################
+# Tasks
+###############################
 
 timeoutFrequency = int(os.getenv('TIMEOUT_TASK_FREQUENCY_IN_MINUTES'))
 timeoutInMinutes = int(os.getenv('TIMEOUT_IN_MINUTES'))
-logger.debug(f'Timeout task: {timeoutFrequency}')
-logger.debug(f'Timeout: {timeoutInMinutes}')
-
 @tasks.loop(minutes=timeoutFrequency)
 async def timeoutChecks():
     with contextlib.suppress(Exception):
@@ -168,11 +138,13 @@ async def timeoutChecks():
 ###############################
 # dev notes
 ###############################
-# count reaction authors, not total of reactions (or pass optional flag)
+# handle ?ready with no arguments - default number? refuse and dm user?
+# handle ?ready with bad arguments - refuse and dm user?
 # include reaction emoji in ready confirmation message
-#
-#
-#
+# IAM for users - who can create ready checks?  who can mention certain roles?
+# DM users on errors / warnings / weird stuff
+# ?help command sends DM with command reference
+# ?version command sends DM with version / release / author info
 ###############################
 
 
