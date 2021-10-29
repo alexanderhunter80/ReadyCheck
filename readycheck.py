@@ -4,41 +4,51 @@ logging.config.fileConfig("logging.conf")
 logger = logging.getLogger("readycheck")
 
 from discord import Message
-import jsonpickle
+from collections.abc import MutableMapping
 import uuid
 from datetime import datetime
 
-class ReadyCheck(object):
-    def __init__(self):
-        id = uuid.uuid4()
-        input = None
-        mention = None
-        message = None
-        target = None
-        author = None
-        guild = None
-        createdAt = datetime.utcnow()
-        updatedAt = datetime.utcnow()
+class ReadyCheck(MutableMapping):
+    def __init__(self, data=()):
+        self.mapping = {}
+        self.mapping["id"] = uuid.uuid4()
+        self.mapping["input"] = None
+        self.mapping["mention"] = None
+        self.mapping["message"] = None
+        self.mapping["target"] = None
+        self.mapping["author"] = None
+        self.mapping["guild"] = None
+        self.mapping["channel"] = None
+        self.mapping["uniqueReactors"] = True
+        self.mapping["createdAt"] = datetime.utcnow()
+        self.mapping["updatedAt"] = datetime.utcnow()
+        self.update(data)
 
-    def build(self, message, target, mention):
-        self.input = message.content
-        self.target = target
-        self.mention = "@"+mention
-        self.author = message.author.id
-        self.guild = message.guild.id
-        self.updatedAt = datetime.utcnow()
+    def __getitem__(self, key):
+        return self.mapping[key]
 
-    def toJson(self):
-        logger.debug('Transforming to JSON:')
-        logger.debug(self)
-        result = jsonpickle.encode(self)
-        logger.debug(result)
-        return result
+    def __delitem__(self, key):
+        del self.mapping[key]
 
-    def fromJson(self, json):
-        logger.debug('Rebuilding from JSON:')
-        logger.debug(json)
-        unpickled = jsonpickle.decode(json)
-        self = unpickled
-        logger.debug(self)
+    def __setitem__(self, key, value):
+        self.mapping[key] = value
+        
+    def __iter__(self):
+        return iter(self.mapping)
+
+    def __len__(self):
+        return len(self.mapping)
+
+    def __repr__(self):
+        return f'{type(self).__name__}({self.mapping})'
+
+    def build(self, message, target, mention, uniqueReactors):
+        self.mapping["input"] = message.content
+        self.mapping["target"] = target
+        self.mapping["mention"] = mention
+        self.mapping["author"] = message.author.id
+        self.mapping["guild"] = message.guild.id
+        self.mapping["channel"] = message.channel.id
+        self.mapping["uniqueReactors"] = uniqueReactors
+        self.mapping["updatedAt"] = datetime.utcnow()
         return self
