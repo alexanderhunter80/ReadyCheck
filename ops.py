@@ -7,6 +7,7 @@ import os
 from dotenv import load_dotenv
 from readycheck import ReadyCheck, glimpse
 from datetime import datetime, timedelta
+import weather as wt
 
 ###############################
 # Database methods
@@ -103,6 +104,16 @@ async def sendHelpMessage(ctx):
     helpUser = ctx.message.author
     channel = await helpUser.create_dm()
     await channel.send(helpMessage)
+
+    return
+
+async def sendWeatherMessage(ctx, season):
+    if season is not None:
+        msg = wt.generate(season)
+    else:
+        msg = "Please specify a season."
+
+    await ctx.send(msg)
 
     return
 

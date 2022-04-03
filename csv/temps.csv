@@ -1,0 +1,9 @@
+tempModifiers,bitter,10,cold,8,cool,5,warm,0,hot,10
+heatWave,warm,14,hot,6
+spring,cold,1,cool,9,warm,9,hot,1
+summer,cool,4,warm,14,hot,2
+fall,cold,1,cool,9,warm,9,hot,1
+winter,bitter,2,cold,14,cool,4
+coldSnap,bitter,6,cold,14
+
+# pattern is Name,Weight

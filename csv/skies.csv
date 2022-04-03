@@ -1,0 +1,4 @@
+standard,thunderstorm,10,1,driving rain,8,2,rain,5,2,gentle rain,2,3,overcast,0,3,scattered clouds,0,4,clear,0,4,bluebird,0,1
+cold,blizzard,10,1,heavy snow,8,2,snow,5,2,flurries,2,3,overcast,0,3,scattered clouds,0,4,clear,0,4,bluebird,0,1
+
+#pattern is Name,ShelterModifier,Weight

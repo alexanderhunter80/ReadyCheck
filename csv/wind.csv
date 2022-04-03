@@ -1,0 +1,4 @@
+windSpeed,30,1,20,1,10,4,6,7,0,7
+windDirection,north,northeast,east,southeast,south,southwest,west,northwest
+
+# pattern is AverageKnots,Weight

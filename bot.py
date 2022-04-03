@@ -99,7 +99,13 @@ async def help(ctx):
 
     await sendHelpMessage(ctx)
 
-    await ctx.message.delete()
+    return
+
+@bot.command()
+async def weather(ctx, season: str = None):
+    logger.info(f'{ctx.message.author.name} requested weather for season {season}')
+    
+    await sendWeatherMessage(ctx,season)
 
     return
     
@@ -152,13 +158,14 @@ async def timeoutChecks():
 ###############################
 # dev notes
 ###############################
-# handle ?ready with no arguments - default number? refuse and dm user?
+# handle ?ready with no arguments - single reactor? default number? refuse and dm user?
 # handle ?ready with bad arguments - refuse and dm user?
 # include reaction emoji in ready confirmation message
 # IAM for users - who can create ready checks?  who can mention certain roles?
 # DM users on errors / warnings / weird stuff
 # ?help command sends DM with command reference
 # ?version command sends DM with version / release / author info
+# is role mention finding case sensitive?
 ###############################
 
 
