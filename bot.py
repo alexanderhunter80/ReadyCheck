@@ -13,6 +13,7 @@ import asyncio
 import contextlib
 from pymongo import MongoClient
 from readycheck import ReadyCheck
+from bson.binary import UuidRepresentation
 
 from ops import *
 
@@ -28,7 +29,8 @@ bot = commands.Bot(                                                             
     allowed_mentions=discord.AllowedMentions(users=True, everyone=True, roles=True, replied_user=True)                          \
 )
 
-mongoClient = MongoClient()
+print(UuidRepresentation.STANDARD)
+mongoClient = MongoClient(uuidRepresentation='standard')
 db = mongoClient.readycheck
 
 @bot.event
