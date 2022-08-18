@@ -8,6 +8,8 @@ from dotenv import load_dotenv
 from readycheck import ReadyCheck, glimpse
 from datetime import datetime, timedelta
 import weather as wt
+import vampire
+import pprint
 
 ###############################
 # Database methods
@@ -112,6 +114,31 @@ async def sendWeatherMessage(ctx, season):
         msg = wt.generate(season)
     else:
         msg = "Please specify a season."
+
+    await ctx.send(msg)
+
+    return
+
+async def rollVampireDice(ctx, dice: int, hunger: int, difficulty: int):
+    if not vampire.validateDice(dice, hunger, difficulty):
+        # error message
+        await ctx.send("rollVampireDice: generic error message")
+        return
+    
+    diceRolled = vampire.rollDice(dice, hunger)
+
+    results = vampire.assembleResultsDict(diceRolled)
+
+    msg = vampire.assembleRollMessage(results, difficulty)
+
+    await ctx.send(msg)
+
+    return
+
+async def rollVampireRouseCheck(ctx):
+    die = vampire.rollSingleDie(False)
+
+    msg = vampire.assembleRouseCheckMessage(die)
 
     await ctx.send(msg)
 

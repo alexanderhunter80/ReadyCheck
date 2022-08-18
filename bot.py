@@ -110,6 +110,22 @@ async def weather(ctx, season: str = None):
     await sendWeatherMessage(ctx,season)
 
     return
+
+@bot.command()
+async def v(ctx, dice: int = 0, hunger: int = 0, difficulty: int = 0):
+    logger.info(f'{ctx.message.author.name} is rolling Vampire dice with count {dice}, hunger {hunger}, difficulty {difficulty}')
+
+    await rollVampireDice(ctx,dice,hunger,difficulty)
+
+    return
+
+@bot.command()
+async def rouse(ctx):
+    logger.info(f'{ctx.message.author.name} is rolling Vampire dice for a Rouse check')
+
+    await rollVampireRouseCheck(ctx)
+
+    return
     
 ###############################
 # Event listeners
