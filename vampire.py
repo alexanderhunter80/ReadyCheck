@@ -141,10 +141,10 @@ def assembleRollMessage(results: dict, difficulty: int):
     margin = abs(margin)
     message += f"by a margin of {margin}"
 
-  if results["isMessyCritical"] and victory:
+  if results["isMessyCritical"] and ((difficulty == 0) or victory):
     message += "\n"
     message += "MESSY CRITICAL!"
-  elif results["isBestialFailure"] and not victory:
+  elif results["isBestialFailure"] and ((difficulty == 0) or not victory):
     message += "\n"
     message += "BESTIAL FAILURE!"
 
