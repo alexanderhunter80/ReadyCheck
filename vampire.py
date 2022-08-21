@@ -101,7 +101,7 @@ def assembleResultsDict(diceRolled: list):
 
   successCount = rawSuccessCount + (2 * math.floor(tenCount/2))
 
-  isBestialFailure = True if hungerOneCount > 0 else False
+  isBestialFailure = True if (hungerOneCount > 0 and oneCount > 1) else False
   isCritical = True if tenCount > 1 else False
   isMessyCritical = True if (hungerTenCount > 0 and tenCount > 1) else False
 
@@ -139,14 +139,14 @@ def assembleRollMessage(results: dict, difficulty: int):
   if difficulty > 0:
     message += "SUCCESS " if victory else "FAILURE "
     margin = abs(margin)
-    message += f"by a margin of {margin}"
+    message += f"by a margin of {margin}\n"
 
+  if results["isCritical"] and ((difficulty == 0) or victory):
+    message += "CRITICAL!\n"
   if results["isMessyCritical"] and ((difficulty == 0) or victory):
-    message += "\n"
-    message += "MESSY CRITICAL!"
+    message += "MESSY CRITICAL!\n"
   elif results["isBestialFailure"] and ((difficulty == 0) or not victory):
-    message += "\n"
-    message += "BESTIAL FAILURE!"
+    message += "BESTIAL FAILURE!\n"
 
   print(message)
   
