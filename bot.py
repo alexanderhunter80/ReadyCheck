@@ -43,7 +43,7 @@ async def on_ready():
 ###############################
 
 @bot.command()
-async def ready(ctx, target: int, mention: str = None, uniqueReactors: bool = True):
+async def ready(ctx, target: int, mention: str = None, unique_reactors: bool = True):
     logger.info(f'Ready check called for {target} reactions by {ctx.message.author.name}')
     
     checks = db.checks
@@ -51,7 +51,7 @@ async def ready(ctx, target: int, mention: str = None, uniqueReactors: bool = Tr
 
     if checkForConflicts is None:
         logger.debug("No conflicts found, continuing")
-        await createReadyCheck(ctx, target, mention, uniqueReactors, checks)
+        await createReadyCheck(ctx, target, mention, unique_reactors, checks)
     else:
         logger.warning(f'Found conflicting item in database: {checkForConflicts["id"]}')
         logger.debug(f'Conflicting object: {checkForConflicts}')
